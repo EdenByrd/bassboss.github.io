@@ -1,0 +1,13 @@
+body {
+    background-color: #111111;
+    font-family: sans-serif;
+}
+
+.background-container {
+    background-image: url('https://cdn.prod.website-files.com/65f2989505d63045bb49388a/65f2989505d63045bb493a80_BB-B-Logo-White-400px-web.webp');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 300px;
+    transform: rotate(45deg);
+    opacity: 0.05;
+}
