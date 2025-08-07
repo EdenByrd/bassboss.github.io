@@ -96,13 +96,20 @@ const App = () => {
     };
 
     const getLowestFreq = (system) => {
-        if (!system.subs || system.subs.length === 0) return 'N/A';
-        const validSubs = system.subs.filter(sub => sub && typeof sub.lowest_freq === 'number');
-        if (validSubs.length === 0) return 'N/A';
+        if (!system || !Array.isArray(system.subs) || system.subs.length === 0) {
+            return 'N/A';
+        }
+        const freqs = system.subs
+            .map(sub => sub ? sub.lowest_freq : null)
+            .filter(freq => typeof freq === 'number');
+
+        if (freqs.length === 0) {
+            return 'N/A';
+        }
         
-        const lowestFrequency = Math.min(...validSubs.map(sub => sub.lowest_freq));
+        const lowestFrequency = Math.min(...freqs);
         
-        if (validSubs.length > 2) {
+        if (system.subs.length > 2) {
             return lowestFrequency - 3;
         }
         
