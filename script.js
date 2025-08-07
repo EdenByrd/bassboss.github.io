@@ -100,18 +100,15 @@ const App = () => {
     };
 
     const getLowestFreq = (system) => {
-        if (system.subs.length === 0) {
+        if (!system.subs || system.subs.length === 0) {
             return 'N/A';
         }
-        // Find the single lowest frequency value among all subs in the system.
         const lowestFrequency = Math.min(...system.subs.map(sub => sub.lowest_freq));
         
-        // If there are more than two subs, apply the coupling effect by subtracting 3 Hz.
         if (system.subs.length > 2) {
             return lowestFrequency - 3;
         }
         
-        // Otherwise, return the lowest frequency as is.
         return lowestFrequency;
     };
 
