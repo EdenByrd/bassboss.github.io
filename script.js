@@ -13,6 +13,7 @@ const App = () => {
   const [quotes, setQuotes] = React.useState(null);
   const [email, setEmail] = React.useState('');
   const [emailSent, setEmailSent] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
   const totalSteps = 8;
 
   React.useEffect(() => {
@@ -30,6 +31,67 @@ const App = () => {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  // Helper function to calculate volume
+  const getVolume = (dimensions) => {
+      if (typeof dimensions !== 'string') return 0;
+      const parts = dimensions.split('x').map(d => parseFloat(d.trim()));
+      if (parts.length !== 3 || parts.some(isNaN)) return 0;
+      return parts[0] * parts[1] * parts[2];
+  };
+
+  const calculateSystemVolume = (system) => {
+      const topVolume = system.tops.reduce((acc, item) => acc + getVolume(item.dimensions), 0);
+      const subVolume = system.subs.reduce((acc, item) => acc + getVolume(item.dimensions), 0);
+      return (topVolume + subVolume) / 1728; // Convert cubic inches to cubic feet
+  };
+
+  const validateAndGenerateQuotes = () => {
+    setErrorMessage(''); // Reset error message
+    const { crowdSize, budget, transportation } = answers;
+    
+    // Define vehicle capacities in cubic feet
+    const vehicleCapacities = {
+        car: 30,
+        suv: 100,
+        truck: 1000, // Effectively unlimited
+        none: Infinity,
+    };
+
+    // Define minimum system cost per crowd size
+    const minSystemCosts = {
+        under100: 5000,
+        upTo300: 14000,
+        upTo1000: 22000,
+        over1000: 35000,
+        upTo5000: 50000,
+    };
+
+    // 1. Budget Check
+    if (budget && minSystemCosts[crowdSize] && budget < minSystemCosts[crowdSize]) {
+        setErrorMessage(`Your budget of $${budget} may be too low for a crowd of this size. A typical system starts around $${minSystemCosts[crowdSize].toLocaleString()}. Please adjust your budget or crowd size.`);
+        return;
+    }
+    
+    // Generate a temporary "smallest possible" system for the crowd size to check transport
+    let tempSystem = { tops: [], subs: [] };
+    if (crowdSize === 'under100') tempSystem = { tops: [productCatalog.tops[0], productCatalog.tops[0]], subs: [productCatalog.subs[0]] };
+    else if (crowdSize === 'upTo300') tempSystem = { tops: [productCatalog.tops[2], productCatalog.tops[2]], subs: [productCatalog.subs[1], productCatalog.subs[1]] };
+    else if (crowdSize === 'upTo1000') tempSystem = { tops: [productCatalog.tops[3], productCatalog.tops[3]], subs: [productCatalog.subs[4], productCatalog.subs[4]] };
+    else tempSystem = { tops: [productCatalog.tops[4], productCatalog.tops[4]], subs: [productCatalog.subs[6], productCatalog.subs[6]] }; // Default for larger crowds
+
+    const systemVolume = calculateSystemVolume(tempSystem);
+    const transportCapacity = vehicleCapacities[transportation];
+
+    // 2. Transportation Check
+    if (transportCapacity && systemVolume > transportCapacity) {
+        setErrorMessage(`A system for this crowd size may not fit in your selected vehicle (${transportation}). The estimated volume is ~${systemVolume.toFixed(1)} ft³, which may exceed your vehicle's capacity of ~${transportCapacity} ft³. Please select a larger vehicle option.`);
+        return;
+    }
+
+    generateQuotes();
+  };
+
+
   const generateQuotes = () => {
     if (!productCatalog) return;
 
@@ -40,11 +102,9 @@ const App = () => {
     let premiumSystem = { tops: [], subs: [] };
     let monitorRec = null;
 
-    // Helper to find products safely
     const findSub = (id) => productCatalog.subs.find(s => s.id === id);
     const findTop = (id) => productCatalog.tops.find(t => t.id === id);
 
-    // Base recommendations on crowd size
     if (crowdSize === 'under100') {
       budgetSystem = { tops: [findTop('SV9-MK3'), findTop('SV9-MK3')], subs: [isBassHeavy ? findSub('DJ18S-MK3') : findSub('BB15-MK3')] };
       premiumSystem = { tops: [findTop('DiaMon-MK3'), findTop('DiaMon-MK3')], subs: [findSub('DJ18S-MK3')] };
@@ -62,7 +122,6 @@ const App = () => {
         premiumSystem = { tops: [findTop('Krakatoa-MK3'), findTop('Krakatoa-MK3')], subs: [findSub('Makara-MK3'), findSub('Makara-MK3'), findSub('Kraken-MK3'), findSub('Kraken-MK3')] };
     }
 
-    // Specific Pairing Logic Overrides
     const hasAT212 = (system) => system.tops.some(top => top && top.id === 'AT212-MK3');
     const hasAT312 = (system) => system.tops.some(top => top && top.id === 'AT312-MK3');
 
@@ -100,15 +159,9 @@ const App = () => {
     };
 
     const getLowestFreq = (system) => {
-        if (!system.subs || system.subs.length === 0) {
-            return 'N/A';
-        }
+        if (system.subs.length === 0) return 'N/A';
         const lowestFrequency = Math.min(...system.subs.map(sub => sub.lowest_freq));
-        
-        if (system.subs.length > 2) {
-            return lowestFrequency - 3;
-        }
-        
+        if (system.subs.length > 2) return lowestFrequency - 3;
         return lowestFrequency;
     };
 
@@ -126,8 +179,8 @@ const App = () => {
     };
 
     setQuotes({
-      budget: { system: budgetSystem, total: calculateTotal(budgetSystem), spl: calculateSpl(budgetSystem), amperage: calculateAmperage(budgetSystem), lowest_freq: getLowestFreq(budgetSystem) },
-      premium: { system: premiumSystem, total: calculateTotal(premiumSystem), spl: calculateSpl(premiumSystem), amperage: calculateAmperage(premiumSystem), lowest_freq: getLowestFreq(premiumSystem) },
+      budget: { system: budgetSystem, total: calculateTotal(budgetSystem), spl: calculateSpl(budgetSystem), amperage: calculateAmperage(budgetSystem), lowest_freq: getLowestFreq(budgetSystem), volume: calculateSystemVolume(budgetSystem) },
+      premium: { system: premiumSystem, total: calculateTotal(premiumSystem), spl: calculateSpl(premiumSystem), amperage: calculateAmperage(premiumSystem), lowest_freq: getLowestFreq(premiumSystem), volume: calculateSystemVolume(premiumSystem) },
       monitorRec: monitorRec,
     });
     nextStep();
@@ -154,8 +207,8 @@ const App = () => {
     const renderNavButtons = (onNext) => (
         <div className="flex justify-between gap-4">
             <button onClick={prevStep} className={secondaryButtonClasses}>Back</button>
-            <button onClick={onNext} className={`${onNext === generateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold px-4 py-3 rounded transition-colors duration-300 w-1/2`}>
-                {onNext === generateQuotes ? 'Generate Quotes' : 'Next'}
+            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold px-4 py-3 rounded transition-colors duration-300 w-1/2`}>
+                {onNext === validateAndGenerateQuotes ? 'Generate Quotes' : 'Next'}
             </button>
         </div>
     );
@@ -247,9 +300,21 @@ const App = () => {
       case 7:
         return (
           <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What is your approximate budget? (Optional)</h2>
-            <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />
-            {renderNavButtons(generateQuotes)}
+            {errorMessage ? (
+                <div className="bg-red-800 border border-red-600 text-white p-4 rounded-lg">
+                    <h3 className="font-bold text-lg mb-2">Input Error</h3>
+                    <p>{errorMessage}</p>
+                    <button onClick={() => setErrorMessage('')} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded mt-4">
+                        Go Back and Change Selections
+                    </button>
+                </div>
+            ) : (
+                <div>
+                    <h2 className="text-2xl font-bold mb-4 text-white">What is your approximate budget? (Optional)</h2>
+                    <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />
+                    {renderNavButtons(validateAndGenerateQuotes)}
+                </div>
+            )}
           </div>
         );
       case 8:
@@ -281,6 +346,7 @@ const App = () => {
                    <p className="font-bold text-gray-300">Est. Sustained SPL: ~{quotes.budget.spl} dB</p>
                    <p className="font-bold text-gray-300">Est. Low End Extension: ~{quotes.budget.lowest_freq} Hz</p>
                    <p className="font-bold text-gray-300">Est. Amperage: {quotes.budget.amperage.toFixed(1)}A @ 120V</p>
+                   <p className="font-bold text-gray-300">Est. Total Volume: {quotes.budget.volume.toFixed(1)} ft³</p>
                 </div>
                 <div className="border p-6 rounded-lg shadow-lg bg-gray-800 border-gray-700">
                   <h3 className="text-xl font-bold mb-4 text-blue-400">High-Capability System</h3>
@@ -292,6 +358,7 @@ const App = () => {
                   <p className="font-bold text-gray-300">Est. Sustained SPL: ~{quotes.premium.spl} dB</p>
                   <p className="font-bold text-gray-300">Est. Low End Extension: ~{quotes.premium.lowest_freq} Hz</p>
                   <p className="font-bold text-gray-300">Est. Amperage: {quotes.premium.amperage.toFixed(1)}A @ 120V</p>
+                  <p className="font-bold text-gray-300">Est. Total Volume: {quotes.premium.volume.toFixed(1)} ft³</p>
                 </div>
               </div>
             )}
