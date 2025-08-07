@@ -40,7 +40,7 @@ const App = () => {
     let premiumSystem = { tops: [], subs: [] };
     let monitorRec = null;
 
-    // Helper to find subs
+    // Helper to find products safely
     const findSub = (id) => productCatalog.subs.find(s => s.id === id);
     const findTop = (id) => productCatalog.tops.find(t => t.id === id);
 
@@ -63,8 +63,8 @@ const App = () => {
     }
 
     // Specific Pairing Logic Overrides
-    const hasAT212 = (system) => system.tops.some(top => top.id === 'AT212-MK3');
-    const hasAT312 = (system) => system.tops.some(top => top.id === 'AT312-MK3');
+    const hasAT212 = (system) => system.tops.some(top => top && top.id === 'AT212-MK3');
+    const hasAT312 = (system) => system.tops.some(top => top && top.id === 'AT312-MK3');
 
     if(hasAT212(budgetSystem)) { budgetSystem.subs = [findSub('VS21-MK3'), findSub('VS21-MK3')]; }
     if(hasAT212(premiumSystem)) { premiumSystem.subs = [findSub('SSP218-MK3'), findSub('SSP218-MK3')]; }
@@ -82,16 +82,20 @@ const App = () => {
         }
         monitorRec = {
             system: monitorSystem,
-            total: monitorSystem.reduce((acc, item) => acc + item.price, 0),
-            amperage: monitorSystem.reduce((acc, item) => acc + item.amperage, 0)
+            total: monitorSystem.reduce((acc, item) => acc + (item ? item.price : 0), 0),
+            amperage: monitorSystem.reduce((acc, item) => acc + (item ? item.amperage : 0), 0)
         };
     }
 
-    const calculateTotal = (system) => system.tops.reduce((acc, item) => acc + item.price, 0) + system.subs.reduce((acc, item) => acc + item.price, 0);
+    const calculateTotal = (system) => {
+        const topTotal = system.tops.reduce((acc, item) => acc + (item ? item.price : 0), 0);
+        const subTotal = system.subs.reduce((acc, item) => acc + (item ? item.price : 0), 0);
+        return topTotal + subTotal;
+    };
     
     const calculateAmperage = (system) => {
-        const topAmps = system.tops.reduce((acc, item) => acc + (item.amperage || 0), 0);
-        const subAmps = system.subs.reduce((acc, item) => acc + (item.amperage || 0), 0);
+        const topAmps = system.tops.reduce((acc, item) => acc + (item ? item.amperage : 0), 0);
+        const subAmps = system.subs.reduce((acc, item) => acc + (item ? item.amperage : 0), 0);
         return topAmps + subAmps;
     };
 
@@ -117,7 +121,7 @@ const App = () => {
     };
 
     const calculateSpl = (system) => {
-        if (!system.subs || system.subs.length === 0) return 0;
+        if (!system || !Array.isArray(system.subs) || system.subs.length === 0) return 0;
         const validSubs = system.subs.filter(sub => sub && typeof sub.spl === 'number');
         if (validSubs.length === 0) return 0;
         if (validSubs.length === 1) return validSubs[0].spl;
