@@ -6,17 +6,17 @@
     { "id": "AT212-MK3", "name": "AT212-MK3", "price": 4995, "type": "top", "dispersion": "80x60", "amperage": 4.6, "dimensions": "47.8 x 14.3 x 17.8" },
     { "id": "AT312-MK3", "name": "AT312-MK3", "price": 5995, "type": "top", "dispersion": "80x80", "amperage": 5.4, "dimensions": "48 x 16 x 20" },
     { "id": "MFLA-MK3", "name": "MFLA-MK3", "price": 6995, "type": "top", "dispersion": "120x10", "amperage": 4.6, "dimensions": "16.1 x 40.5 x 20.4" },
-    { "id": "Krakatoa-MK3", "name": "Krakatoa-MK3", "price": 19995, "type": "top", "dispersion": "N/A", "amperage": 15, "dimensions": "48 x 48 x 24" },
+    { "id": "Krakatoa-MK3", "name": "Krakatoa-MK3", "price": 19995, "type": "top", "dispersion": "60x40", "amperage": 15, "dimensions": "48 x 48 x 24" },
     { "id": "CCM12-MK3", "name": "CCM12-MK3", "price": 2295, "type": "monitor", "amperage": 1.4, "dimensions": "14 x 14 x 11" }
   ],
   "subs": [
-    { "id": "BB15-MK3", "name": "BB15-MK3", "price": 2495, "spl": 128, "type": "sub", "amperage": 4.6, "dimensions": "20.5 x 17 x 24" },
-    { "id": "DJ18S-MK3", "name": "DJ18S-MK3", "price": 3595, "spl": 131, "type": "sub", "amperage": 4.6, "dimensions": "27.5 x 20.5 x 29.5" },
-    { "id": "SSP118-MK3", "name": "SSP118-MK3", "price": 3995, "spl": 130, "type": "sub", "amperage": 4.6, "dimensions": "22.5 x 30 x 24" },
-    { "id": "VS21-MK3", "name": "VS21-MK3", "price": 4995, "spl": 132, "type": "sub", "amperage": 4.6, "dimensions": "36 x 24 x 36" },
-    { "id": "SSP218-MK3", "name": "SSP218-MK3", "price": 6495, "spl": 136, "type": "sub", "amperage": 9, "dimensions": "22.5 x 48 x 29.5" },
-    { "id": "ZV28-MK3", "name": "ZV28-MK3", "price": 7495, "spl": 136, "type": "sub", "amperage": 9, "dimensions": "22.5 x 42 x 42" },
-    { "id": "Makara-MK3", "name": "Makara-MK3", "price": 7995, "spl": 138, "type": "sub", "amperage": 9, "dimensions": "28.5 x 45 x 45" },
-    { "id": "Kraken-MK3", "name": "Kraken-MK3", "price": 14995, "spl": 144, "type": "sub", "amperage": 18, "dimensions": "45 x 45 x 45" }
+    { "id": "BB15-MK3", "name": "BB15-MK3", "price": 2495, "spl": 128, "type": "sub", "amperage": 4.6, "dimensions": "20.5 x 17 x 24", "lowest_freq": 40 },
+    { "id": "DJ18S-MK3", "name": "DJ18S-MK3", "price": 3595, "spl": 131, "type": "sub", "amperage": 4.6, "dimensions": "27.5 x 20.5 x 29.5", "lowest_freq": 27 },
+    { "id": "SSP118-MK3", "name": "SSP118-MK3", "price": 3995, "spl": 130, "type": "sub", "amperage": 4.6, "dimensions": "22.5 x 30 x 24", "lowest_freq": 30 },
+    { "id": "VS21-MK3", "name": "VS21-MK3", "price": 4995, "spl": 132, "type": "sub", "amperage": 4.6, "dimensions": "36 x 24 x 36", "lowest_freq": 28 },
+    { "id": "SSP218-MK3", "name": "SSP218-MK3", "price": 6495, "spl": 136, "type": "sub", "amperage": 9, "dimensions": "22.5 x 48 x 29.5", "lowest_freq": 30 },
+    { "id": "ZV28-MK3", "name": "ZV28-MK3", "price": 7495, "spl": 136, "type": "sub", "amperage": 9, "dimensions": "22.5 x 42 x 42", "lowest_freq": 23 },
+    { "id": "Makara-MK3", "name": "Makara-MK3", "price": 7995, "spl": 138, "type": "sub", "amperage": 9, "dimensions": "28.5 x 45 x 45", "lowest_freq": 27 },
+    { "id": "Kraken-MK3", "name": "Kraken-MK3", "price": 14995, "spl": 144, "type": "sub", "amperage": 18, "dimensions": "45 x 45 x 45", "lowest_freq": 25 }
   ]
 }
