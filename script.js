@@ -99,10 +99,14 @@ const App = () => {
         if (!system.subs || system.subs.length === 0) return 'N/A';
         const validSubs = system.subs.filter(sub => sub && typeof sub.lowest_freq === 'number');
         if (validSubs.length === 0) return 'N/A';
-        const totalFreq = validSubs.reduce((acc, sub) => acc + sub.lowest_freq, 0);
-        const averageFreq = totalFreq / validSubs.length;
-        const finalFreq = averageFreq - 3;
-        return Math.round(finalFreq);
+        
+        const lowestFrequency = Math.min(...validSubs.map(sub => sub.lowest_freq));
+        
+        if (validSubs.length > 2) {
+            return lowestFrequency - 3;
+        }
+        
+        return lowestFrequency;
     };
 
     const calculateSpl = (system) => {
