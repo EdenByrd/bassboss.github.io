@@ -88,22 +88,33 @@ const App = () => {
     }
 
     const calculateTotal = (system) => system.tops.reduce((acc, item) => acc + item.price, 0) + system.subs.reduce((acc, item) => acc + item.price, 0);
-    const calculateAmperage = (system) => system.tops.reduce((acc, item) => acc + item.amperage, 0) + system.subs.reduce((acc, item) => acc + item.amperage, 0);
+    
+    const calculateAmperage = (system) => {
+        const topAmps = system.tops.reduce((acc, item) => acc + (item.amperage || 0), 0);
+        const subAmps = system.subs.reduce((acc, item) => acc + (item.amperage || 0), 0);
+        return topAmps + subAmps;
+    };
+
     const getLowestFreq = (system) => {
-        if (system.subs.length === 0) return 'N/A';
-        const totalFreq = system.subs.reduce((acc, sub) => acc + sub.lowest_freq, 0);
-        const averageFreq = totalFreq / system.subs.length;
+        if (!system.subs || system.subs.length === 0) return 'N/A';
+        const validSubs = system.subs.filter(sub => sub && typeof sub.lowest_freq === 'number');
+        if (validSubs.length === 0) return 'N/A';
+        const totalFreq = validSubs.reduce((acc, sub) => acc + sub.lowest_freq, 0);
+        const averageFreq = totalFreq / validSubs.length;
         const finalFreq = averageFreq - 3;
         return Math.round(finalFreq);
     };
+
     const calculateSpl = (system) => {
-        if (system.subs.length === 0) return 0;
-        if (system.subs.length === 1) return system.subs[0].spl;
-        const allSameSubs = system.subs.every(sub => sub.id === system.subs[0].id);
+        if (!system.subs || system.subs.length === 0) return 0;
+        const validSubs = system.subs.filter(sub => sub && typeof sub.spl === 'number');
+        if (validSubs.length === 0) return 0;
+        if (validSubs.length === 1) return validSubs[0].spl;
+        const allSameSubs = validSubs.every(sub => sub.id === validSubs[0].id);
         if (allSameSubs) {
-            return Math.round(system.subs[0].spl + 6 * (Math.log(system.subs.length) / Math.log(2)));
+            return Math.round(validSubs[0].spl + 6 * (Math.log(validSubs.length) / Math.log(2)));
         }
-        const totalSPL = 10 * Math.log10(system.subs.reduce((acc, sub) => acc + Math.pow(10, sub.spl / 10), 0));
+        const totalSPL = 10 * Math.log10(validSubs.reduce((acc, sub) => acc + Math.pow(10, sub.spl / 10), 0));
         return Math.round(totalSPL);
     };
 
