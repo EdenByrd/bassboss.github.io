@@ -100,23 +100,29 @@ const App = () => {
     };
 
     const getLowestFreq = (system) => {
+        // 1. Ensure system and subs array are valid and not empty
         if (!system || !Array.isArray(system.subs) || system.subs.length === 0) {
             return 'N/A';
         }
+        // 2. Get a clean array of just the frequency numbers
         const freqs = system.subs
-            .map(sub => sub ? sub.lowest_freq : null)
-            .filter(freq => typeof freq === 'number');
+            .map(sub => sub?.lowest_freq) // Safely get the lowest_freq, or undefined if sub is missing
+            .filter(freq => typeof freq === 'number'); // Keep only the actual numbers
 
+        // 3. If no valid frequencies were found after filtering, return 'N/A'
         if (freqs.length === 0) {
             return 'N/A';
         }
         
+        // 4. Find the lowest frequency in the clean array
         const lowestFrequency = Math.min(...freqs);
         
+        // 5. Apply the coupling logic: if more than 2 subs, subtract 3 Hz
         if (system.subs.length > 2) {
             return lowestFrequency - 3;
         }
         
+        // 6. Otherwise, just return the lowest frequency
         return lowestFrequency;
     };
 
