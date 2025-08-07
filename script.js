@@ -31,60 +31,54 @@ const App = () => {
   const prevStep = () => setStep(step - 1);
 
   const generateQuotes = () => {
-    if (!productCatalog) return; // Don't run if data isn't loaded
+    if (!productCatalog) return;
 
     const { crowdSize, venueType, boothMonitors, genre } = answers;
+    const isBassHeavy = genre === 'hiphop' || genre === 'electronic';
 
     let budgetSystem = { tops: [], subs: [] };
     let premiumSystem = { tops: [], subs: [] };
     let monitorRec = null;
 
+    // Helper to find subs
+    const findSub = (id) => productCatalog.subs.find(s => s.id === id);
+    const findTop = (id) => productCatalog.tops.find(t => t.id === id);
+
     // Base recommendations on crowd size
     if (crowdSize === 'under100') {
-      budgetSystem = { tops: [productCatalog.tops[0], productCatalog.tops[0]], subs: [productCatalog.subs[0]] };
-      premiumSystem = { tops: [productCatalog.tops[1], productCatalog.tops[1]], subs: [productCatalog.subs[1]] };
+      budgetSystem = { tops: [findTop('SV9-MK3'), findTop('SV9-MK3')], subs: [isBassHeavy ? findSub('DJ18S-MK3') : findSub('BB15-MK3')] };
+      premiumSystem = { tops: [findTop('DiaMon-MK3'), findTop('DiaMon-MK3')], subs: [findSub('DJ18S-MK3')] };
     } else if (crowdSize === 'upTo300') {
-      budgetSystem = { tops: [productCatalog.tops[2], productCatalog.tops[2]], subs: [productCatalog.subs[1], productCatalog.subs[1]] };
-      premiumSystem = { tops: [productCatalog.tops[3], productCatalog.tops[3]], subs: [productCatalog.subs[3], productCatalog.subs[3]] };
+      budgetSystem = { tops: [findTop('DV12-MK3'), findTop('DV12-MK3')], subs: [findSub('DJ18S-MK3'), findSub('DJ18S-MK3')] };
+      premiumSystem = { tops: [findTop('AT212-MK3'), findTop('AT212-MK3')], subs: [findSub('VS21-MK3'), findSub('VS21-MK3')] };
     } else if (crowdSize === 'upTo1000') {
-        budgetSystem = { tops: [productCatalog.tops[3], productCatalog.tops[3]], subs: [productCatalog.subs[4], productCatalog.subs[4]] };
-        premiumSystem = { tops: [productCatalog.tops[4], productCatalog.tops[4]], subs: [productCatalog.subs[5], productCatalog.subs[5]] };
+        budgetSystem = { tops: [findTop('AT212-MK3'), findTop('AT212-MK3')], subs: [findSub('SSP118-MK3'), findSub('SSP118-MK3'), findSub('SSP118-MK3'), findSub('SSP118-MK3')] };
+        premiumSystem = { tops: [findTop('AT312-MK3'), findTop('AT312-MK3')], subs: [findSub('SSP218-MK3'), findSub('SSP218-MK3')] };
+    } else if (crowdSize === 'over1000') {
+        budgetSystem = { tops: [findTop('AT312-MK3'), findTop('AT312-MK3')], subs: [findSub('SSP218-MK3'), findSub('SSP218-MK3'), findSub('SSP218-MK3'), findSub('SSP218-MK3')] };
+        premiumSystem = { tops: [findTop('MFLA-MK3'), findTop('MFLA-MK3')], subs: [findSub('Kraken-MK3'), findSub('Kraken-MK3')] };
     } else if (crowdSize === 'upTo5000') {
-        budgetSystem = { tops: [productCatalog.tops[5], productCatalog.tops[5]], subs: [productCatalog.subs[6], productCatalog.subs[6], productCatalog.subs[6], productCatalog.subs[6]] };
-        premiumSystem = { tops: [productCatalog.tops.find(t => t.id === 'Krakatoa-MK3'), productCatalog.tops.find(t => t.id === 'Krakatoa-MK3')], subs: [productCatalog.subs.find(s => s.id === 'Makara-MK3'), productCatalog.subs.find(s => s.id === 'Makara-MK3'), productCatalog.subs.find(s => s.id === 'Kraken-MK3'), productCatalog.subs.find(s => s.id === 'Kraken-MK3')] };
-    } else {
-        budgetSystem = { tops: [productCatalog.tops[4], productCatalog.tops[4]], subs: [productCatalog.subs[6], productCatalog.subs[6]] };
-        premiumSystem = { tops: [productCatalog.tops[5], productCatalog.tops[5]], subs: [productCatalog.subs[7], productCatalog.subs[7]] };
+        budgetSystem = { tops: [findTop('MFLA-MK3'), findTop('MFLA-MK3'), findTop('MFLA-MK3'), findTop('MFLA-MK3')], subs: [findSub('Makara-MK3'), findSub('Makara-MK3'), findSub('Makara-MK3'), findSub('Makara-MK3')] };
+        premiumSystem = { tops: [findTop('Krakatoa-MK3'), findTop('Krakatoa-MK3')], subs: [findSub('Makara-MK3'), findSub('Makara-MK3'), findSub('Kraken-MK3'), findSub('Kraken-MK3')] };
     }
 
-    if (venueType === 'outdoor' && (crowdSize === 'upTo1000' || crowdSize === 'over1000')) {
-        budgetSystem.tops = [productCatalog.tops[2], productCatalog.tops[2], productCatalog.tops[2], productCatalog.tops[2]];
-        premiumSystem.tops = [productCatalog.tops[5], productCatalog.tops[5]];
-    } else if (venueType === 'indoor' && (crowdSize === 'upTo1000' || crowdSize === 'over1000')) {
-        premiumSystem.tops = [productCatalog.tops[4], productCatalog.tops[4]];
-    }
+    // Specific Pairing Logic Overrides
+    const hasAT212 = (system) => system.tops.some(top => top.id === 'AT212-MK3');
+    const hasAT312 = (system) => system.tops.some(top => top.id === 'AT312-MK3');
 
-    if (crowdSize === 'upTo300' || crowdSize === 'upTo1000' || crowdSize === 'over1000' || crowdSize === 'upTo5000') {
-        if (budgetSystem.subs.length < 2) { budgetSystem.subs = [productCatalog.subs[1], productCatalog.subs[1]]; }
-        if (premiumSystem.subs.length < 2) { premiumSystem.subs = [productCatalog.subs[3], productCatalog.subs[3]]; }
-    }
-    
-    const hasATSeries = (system) => system.tops.some(top => top.id === 'AT212-MK3' || top.id === 'AT312-MK3');
-    if (hasATSeries(budgetSystem) && budgetSystem.subs.length < 2) {
-        budgetSystem.subs = [productCatalog.subs[4], productCatalog.subs[4]];
-    }
-    if (hasATSeries(premiumSystem) && premiumSystem.subs.length < 2) {
-        premiumSystem.subs = [productCatalog.subs[5], productCatalog.subs[5]];
-    }
+    if(hasAT212(budgetSystem)) { budgetSystem.subs = [findSub('VS21-MK3'), findSub('VS21-MK3')]; }
+    if(hasAT212(premiumSystem)) { premiumSystem.subs = [findSub('SSP218-MK3'), findSub('SSP218-MK3')]; }
+    if(hasAT312(budgetSystem)) { budgetSystem.subs = [findSub('SSP218-MK3'), findSub('SSP218-MK3')]; }
+    if(hasAT312(premiumSystem)) { premiumSystem.subs = [findSub('Kraken-MK3'), findSub('Kraken-MK3')]; }
 
     if (boothMonitors === 'yes') {
         let monitorSystem = [];
         if (genre === 'live') {
-            monitorSystem = [productCatalog.tops.find(t=>t.id==='CCM12-MK3'), productCatalog.tops.find(t=>t.id==='CCM12-MK3'), productCatalog.tops.find(t=>t.id==='CCM12-MK3')];
-        } else if (genre === 'hiphop' || genre === 'electronic') {
-            monitorSystem = [productCatalog.tops.find(t=>t.id==='DiaMon-MK3'), productCatalog.tops.find(t=>t.id==='DiaMon-MK3')];
+            monitorSystem = [findTop('CCM12-MK3'), findTop('CCM12-MK3'), findTop('CCM12-MK3')];
+        } else if (isBassHeavy) {
+            monitorSystem = [findTop('DiaMon-MK3'), findTop('DiaMon-MK3')];
         } else {
-            monitorSystem = [productCatalog.tops.find(t=>t.id==='CCM12-MK3'), productCatalog.tops.find(t=>t.id==='CCM12-MK3')];
+            monitorSystem = [findTop('CCM12-MK3'), findTop('CCM12-MK3')];
         }
         monitorRec = {
             system: monitorSystem,
@@ -95,6 +89,13 @@ const App = () => {
 
     const calculateTotal = (system) => system.tops.reduce((acc, item) => acc + item.price, 0) + system.subs.reduce((acc, item) => acc + item.price, 0);
     const calculateAmperage = (system) => system.tops.reduce((acc, item) => acc + item.amperage, 0) + system.subs.reduce((acc, item) => acc + item.amperage, 0);
+    const getLowestFreq = (system) => {
+        if (system.subs.length === 0) return 'N/A';
+        const totalFreq = system.subs.reduce((acc, sub) => acc + sub.lowest_freq, 0);
+        const averageFreq = totalFreq / system.subs.length;
+        const finalFreq = averageFreq - 3;
+        return Math.round(finalFreq);
+    };
     const calculateSpl = (system) => {
         if (system.subs.length === 0) return 0;
         if (system.subs.length === 1) return system.subs[0].spl;
@@ -107,8 +108,8 @@ const App = () => {
     };
 
     setQuotes({
-      budget: { system: budgetSystem, total: calculateTotal(budgetSystem), spl: calculateSpl(budgetSystem), amperage: calculateAmperage(budgetSystem) },
-      premium: { system: premiumSystem, total: calculateTotal(premiumSystem), spl: calculateSpl(premiumSystem), amperage: calculateAmperage(premiumSystem) },
+      budget: { system: budgetSystem, total: calculateTotal(budgetSystem), spl: calculateSpl(budgetSystem), amperage: calculateAmperage(budgetSystem), lowest_freq: getLowestFreq(budgetSystem) },
+      premium: { system: premiumSystem, total: calculateTotal(premiumSystem), spl: calculateSpl(premiumSystem), amperage: calculateAmperage(premiumSystem), lowest_freq: getLowestFreq(premiumSystem) },
       monitorRec: monitorRec,
     });
     nextStep();
@@ -260,6 +261,7 @@ const App = () => {
                   </ul>
                   <p className="font-bold mt-4 text-white">Total MSRP: ${quotes.budget.total.toLocaleString()}</p>
                    <p className="font-bold text-gray-300">Est. Sustained SPL: ~{quotes.budget.spl} dB</p>
+                   <p className="font-bold text-gray-300">Est. Low End Extension: ~{quotes.budget.lowest_freq} Hz</p>
                    <p className="font-bold text-gray-300">Est. Amperage: {quotes.budget.amperage.toFixed(1)}A @ 120V</p>
                 </div>
                 <div className="border p-6 rounded-lg shadow-lg bg-gray-800 border-gray-700">
@@ -270,6 +272,7 @@ const App = () => {
                   </ul>
                   <p className="font-bold mt-4 text-white">Total MSRP: ${quotes.premium.total.toLocaleString()}</p>
                   <p className="font-bold text-gray-300">Est. Sustained SPL: ~{quotes.premium.spl} dB</p>
+                  <p className="font-bold text-gray-300">Est. Low End Extension: ~{quotes.premium.lowest_freq} Hz</p>
                   <p className="font-bold text-gray-300">Est. Amperage: {quotes.premium.amperage.toFixed(1)}A @ 120V</p>
                 </div>
               </div>
