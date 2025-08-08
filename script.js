@@ -185,7 +185,7 @@ const App = () => {
 
   const sendEmail = () => {
     // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
-    const scriptURL = 'https://script.google.com/home/projects/12vQvNWt-6iEEp9WLXvhqo8hC1yRv5K7Zz0pEUq3gBD6_dub-W6c_b9ll';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycby-JUBri-o2zdrUFkIACvkwcXTdDgxjfDrlLfM-D4YRA_QF-hF0pXQkuTqaDLJrfwglkA/exec';
 
     if (email && quotes) {
       const payload = {
