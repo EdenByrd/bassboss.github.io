@@ -185,7 +185,7 @@ const App = () => {
 
   const sendEmail = () => {
     // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
-    const scriptURL = 'https://script.google.com/macros/s/AKfycby-JUBri-o2zdrUFkIACvkwcXTdDgxjfDrlLfM-D4YRA_QF-hF0pXQkuTqaDLJrfwglkA/exec';
+    const scriptURL = 'YOUR_GOOGLE_APP_SCRIPT_URL_HERE';
 
     if (email && quotes) {
       const payload = {
@@ -195,10 +195,7 @@ const App = () => {
 
       fetch(scriptURL, {
         method: 'POST',
-        mode: 'no-cors', // Important for cross-origin requests to Google Scripts
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        mode: 'no-cors',
         body: JSON.stringify(payload),
       })
       .then(() => {
