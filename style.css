@@ -1,5 +1,5 @@
 body {
-    background-color: #111111;
+    /* The background color is removed from here to allow the video to be visible */
     font-family: sans-serif;
 }
 
@@ -10,7 +10,8 @@ body {
     min-width: 100%;
     min-height: 100%;
     z-index: -1; /* Puts the video behind all other content */
-    opacity: 0.1; /* Optional: Makes the video less distracting */
+    opacity: 0.15; /* Slightly increased opacity for better visibility */
+    object-fit: cover; /* Ensures the video covers the screen without distortion */
 }
 
 #root {
