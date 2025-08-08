@@ -184,15 +184,36 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    if (email) {
-      console.log('Sending email to:', email);
-      setEmailSent(true);
-      setTimeout(() => {
-          setStep(1);
-          setEmail('');
-          setEmailSent(false);
-          setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
-      }, 3000);
+    // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
+    const scriptURL = 'YOUR_GOOGLE_APP_SCRIPT_URL_HERE';
+
+    if (email && quotes) {
+      const payload = {
+        email: email,
+        quotes: quotes
+      };
+
+      fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // Important for cross-origin requests to Google Scripts
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(() => {
+        setEmailSent(true);
+        setTimeout(() => {
+            setStep(1);
+            setEmail('');
+            setEmailSent(false);
+            setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
+        }, 3000);
+      })
+      .catch(error => {
+        console.error('Error sending email:', error);
+        alert('There was an error sending your quote. Please try again.');
+      });
     }
   };
   
