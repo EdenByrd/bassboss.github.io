@@ -12,3 +12,8 @@ body {
     z-index: -1; /* Puts the video behind all other content */
     opacity: 0.1; /* Optional: Makes the video less distracting */
 }
+
+#root {
+    position: relative;
+    z-index: 1; /* Ensures the app content is on top of the video */
+}
