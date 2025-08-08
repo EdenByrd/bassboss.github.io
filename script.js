@@ -184,33 +184,36 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
-    const scriptURL = 'https://script.google.com/macros/s/AKfycby-JUBri-o2zdrUFkIACvkwcXTdDgxjfDrlLfM-D4YRA_QF-hF0pXQkuTqaDLJrfwglkA/exec';
-
+    const scriptURL = 'YOUR_GOOGLE_APP_SCRIPT_URL_HERE';
+    
     if (email && quotes) {
-      const payload = {
-        email: email,
-        quotes: quotes
-      };
+        const payload = {
+            email: email,
+            quotes: quotes
+        };
 
-      fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(payload),
-      })
-      .then(() => {
-        setEmailSent(true);
-        setTimeout(() => {
-            setStep(1);
-            setEmail('');
-            setEmailSent(false);
-            setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
-        }, 3000);
-      })
-      .catch(error => {
-        console.error('Error sending email:', error);
-        alert('There was an error sending your quote. Please try again.');
-      });
+        // Use FormData to send the data as a string
+        const formData = new FormData();
+        formData.append('postData', JSON.stringify(payload));
+
+        fetch(scriptURL, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            // Even though the response will be opaque, a successful dispatch means we can proceed
+            setEmailSent(true);
+            setTimeout(() => {
+                setStep(1);
+                setEmail('');
+                setEmailSent(false);
+                setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error sending email:', error);
+            alert('There was an error sending your quote. Please try again.');
+        });
     }
   };
   
