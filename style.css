@@ -3,11 +3,12 @@ body {
     font-family: sans-serif;
 }
 
-.background-container {
-    background-image: url('https://cdn.prod.website-files.com/65f2989505d63045bb49388a/65f2989505d63045bb493a80_BB-B-Logo-White-400px-web.webp');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 300px;
-    transform: rotate(45deg);
-    opacity: 0.05;
+#background-video {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1; /* Puts the video behind all other content */
+    opacity: 0.1; /* Optional: Makes the video less distracting */
 }
