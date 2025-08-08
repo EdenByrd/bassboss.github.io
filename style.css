@@ -1,24 +1,24 @@
 body {
-    background-color: #111; /* Fallback background color */
+    margin: 0;
     font-family: sans-serif;
+    background-color: #000; /* Fallback color if video fails to load */
 }
 
 #background-video {
     position: fixed;
-    right: 0;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
     min-width: 100%;
     min-height: 100%;
-    z-index: -1; /* Puts the video behind all other content */
+    width: auto;
+    height: auto;
+    z-index: 0; /* Base layer */
+    transform: translateX(-50%) translateY(-50%);
     opacity: 0.15; 
-    object-fit: cover; /* Ensures the video covers the screen without distortion */
+    object-fit: cover;
 }
 
 #root {
     position: relative;
-    z-index: 1; /* Ensures the app content is on top of the video */
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    z-index: 1; /* Content layer, sits on top of the video */
 }
