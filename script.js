@@ -184,36 +184,34 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw_2y7bCvr06TdV6A8JZxP66BdZnxVYN9PGFVq5YDG1w5E6Un2h7p6LG1U64JdhR-YzoA/exec';
-
+    const scriptURL = 'YOUR_GOOGLE_APP_SCRIPT_URL_HERE';
+    
     if (email && quotes) {
-      const payload = {
-        email: email,
-        quotes: quotes
-      };
+        const payload = {
+            email: email,
+            quotes: quotes
+        };
 
-      fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors', // Important for cross-origin requests to Google Scripts
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-      .then(() => {
-        setEmailSent(true);
-        setTimeout(() => {
-            setStep(1);
-            setEmail('');
-            setEmailSent(false);
-            setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
-        }, 3000);
-      })
-      .catch(error => {
-        console.error('Error sending email:', error);
-        alert('There was an error sending your quote. Please try again.');
-      });
+        const formData = new FormData();
+        formData.append('postData', JSON.stringify(payload));
+
+        fetch(scriptURL, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            setEmailSent(true);
+            setTimeout(() => {
+                setStep(1);
+                setEmail('');
+                setEmailSent(false);
+                setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error sending email:', error);
+            alert('There was an error sending your quote. Please try again.');
+        });
     }
   };
   
@@ -413,8 +411,8 @@ const App = () => {
   }
 
   return (
-    <div className="p-4">
-      <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden mx-auto">
+    <div className="font-sans relative overflow-hidden">
+      <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative z-10 mx-auto my-4">
         <div className="background-container absolute inset-0 pointer-events-none"></div>
         <div className="relative z-10">
             <img 
