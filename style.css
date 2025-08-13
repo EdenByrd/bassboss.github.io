@@ -1,13 +1,26 @@
 body {
-    background-color: #111111;
+    background-color: #111111; /* Fallback background color */
     font-family: sans-serif;
+    margin: 0;
 }
 
-.background-container {
-    background-image: url('https://cdn.prod.website-files.com/65f2989505d63045bb49388a/65f2989505d63045bb493a80_BB-B-Logo-White-400px-web.webp');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 300px;
-    transform: rotate(45deg);
-    opacity: 0.05;
+#background-video {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1; /* Puts the video behind all other content */
+    opacity: 0.15; 
+    object-fit: cover; /* Ensures the video covers the screen without distortion */
+}
+
+#root {
+    position: relative;
+    z-index: 1; /* Ensures the app content is on top of the video */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
 }
