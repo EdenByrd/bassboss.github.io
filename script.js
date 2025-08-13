@@ -184,7 +184,8 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz-gAuBRo2TM_DY7Libx5FYdv2exC02cuMCHewZLYlCYphjMi6q69B0lwk-zTK5Uzst/exec';
+    // ** IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL **
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw_2y7bCvr06TdV6A8JZxP66BdZnxVYN9PGFVq5YDG1w5E6Un2h7p6LG1U64JdhR-YzoA/exec';
     
     if (email && quotes) {
         const payload = {
@@ -192,7 +193,7 @@ const App = () => {
             quotes: quotes
         };
 
-        // Use FormData to send the data as a string
+        // This is the corrected method that works with Google Apps Script
         const formData = new FormData();
         formData.append('postData', JSON.stringify(payload));
 
@@ -201,7 +202,7 @@ const App = () => {
             body: formData,
         })
         .then(response => {
-            // Even though the response will be opaque, a successful dispatch means we can proceed
+            // The request was sent successfully. We don't need to read the response.
             setEmailSent(true);
             setTimeout(() => {
                 setStep(1);
