@@ -1,26 +1,32 @@
 body {
-    background-color: #111111; /* Fallback background color */
     font-family: sans-serif;
     margin: 0;
+    /* Background color is removed from here to let the video show through */
 }
 
 #background-video {
     position: fixed;
-    right: 0;
-    bottom: 0;
-    min-width: 100%;
-    min-height: 100%;
-    z-index: -1; /* Puts the video behind all other content */
-    opacity: 0.15; 
-    object-fit: cover; /* Ensures the video covers the screen without distortion */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1; /* Sits behind everything */
+    opacity: 0.15;
 }
 
-#root {
-    position: relative;
-    z-index: 1; /* Ensures the app content is on top of the video */
+#content-wrapper {
+    position: relative; /* Establishes a stacking context */
+    z-index: 1; /* Sits on top of the video */
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+}
+
+#root {
+    /* The React app will be mounted here. It will be centered by the content-wrapper. */
+    width: 100%;
+    max-width: 56rem; /* equivalent to max-w-4xl */
 }
