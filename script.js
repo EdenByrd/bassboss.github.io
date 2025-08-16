@@ -411,7 +411,7 @@ const App = () => {
   }
 
   return (
-    <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
+    <div className="bg-black bg-opacity-75 border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
         <div className="background-container absolute inset-0 pointer-events-none"></div>
         <div className="relative z-10">
             <img 
