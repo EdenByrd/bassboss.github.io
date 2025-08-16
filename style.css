@@ -12,7 +12,7 @@ body {
     height: 100vh;
     object-fit: cover;
     z-index: -1; /* Sits behind everything */
-    opacity: 0.1; /* Lowered opacity for a more subtle effect */
+    opacity: 1; /* Lowered opacity for a more subtle effect */
 }
 
 #content-wrapper {
