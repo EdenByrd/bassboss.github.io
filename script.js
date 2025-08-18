@@ -186,8 +186,6 @@ const App = () => {
   const sendEmail = () => {
     if (!email || !quotes) return;
 
-    // ** NEW EMAILJS LOGIC **
-
     // 1. Create the HTML content for the email
     const formatSystemForEmail = (systemData, title) => {
         if (!systemData || !systemData.system) return '';
