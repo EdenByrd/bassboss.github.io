@@ -184,22 +184,48 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzxL57S91R1dbDoJfBXqDcvrgYKH7SeHi2Mkinc_fW16bYcuMPGXeVv37CAC6Wg26_CbA/exec';
-    
-    if (email && quotes) {
-        const payload = {
-            email: email,
-            quotes: quotes
-        };
+    if (!email || !quotes) return;
 
-        const formData = new FormData();
-        formData.append('postData', JSON.stringify(payload));
+    // ** NEW EMAILJS LOGIC **
 
-        fetch(scriptURL, {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => {
+    // 1. Create the HTML content for the email
+    const formatSystemForEmail = (systemData, title) => {
+        if (!systemData || !systemData.system) return '';
+        let html = `<h2>${title}</h2><ul>`;
+        if (Array.isArray(systemData.system.tops)) {
+            systemData.system.tops.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        if (Array.isArray(systemData.system.subs)) {
+            systemData.system.subs.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        if (Array.isArray(systemData.system) && !systemData.system.tops && !systemData.system.subs) {
+            systemData.system.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        html += `</ul><p><b>Total MSRP:</b> $${systemData.total.toLocaleString()}</p><hr>`;
+        return html;
+    };
+
+    const emailBody = `
+        <h1>Your BASSBOSS System Recommendation</h1>
+        <p>Here are the custom system quotes you generated based on your requirements.</p>
+        <hr>
+        ${formatSystemForEmail(quotes.budget, 'Standard System')}
+        ${formatSystemForEmail(quotes.premium, 'High-Capability System')}
+        ${quotes.monitorRec ? formatSystemForEmail(quotes.monitorRec, 'Booth Monitor Recommendation') : ''}
+    `;
+
+    // 2. Define the parameters for the EmailJS template
+    const templateParams = {
+        to_email: email,
+        subject: "Your BASSBOSS System Quote",
+        message: emailBody,
+    };
+
+    // 3. Send the email using the EmailJS SDK
+    // ** IMPORTANT: Replace with your actual IDs from your EmailJS account **
+    emailjs.send('service_6hqukwx', 'template_lznlhid', templateParams, 'TV2Z1HnCPye7yY8QQ')
+        .then((response) => {
+            console.log('SUCCESS!', response.status, response.text);
             setEmailSent(true);
             setTimeout(() => {
                 setStep(1);
@@ -207,12 +233,10 @@ const App = () => {
                 setEmailSent(false);
                 setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
             }, 3000);
-        })
-        .catch(error => {
-            console.error('Error sending email:', error);
+        }, (error) => {
+            console.log('FAILED...', error);
             alert('There was an error sending your quote. Please try again.');
         });
-    }
   };
   
   const renderStep = () => {
