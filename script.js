@@ -226,7 +226,7 @@ const App = () => {
     };
     const emailBody = `<h1>Your BASSBOSS System Recommendation</h1><p>Here are the custom system quotes you generated based on your requirements.</p><hr>${formatSystemForEmail(quotes.budget, 'Standard System')}${formatSystemForEmail(quotes.premium, 'High-Capability System')}${quotes.monitorRec ? formatSystemForEmail(quotes.monitorRec, 'Booth Monitor Recommendation') : ''}`;
     const templateParams = { to_email: email, subject: "Your BASSBOSS System Quote", message: emailBody };
-    emailjs.send('service_1v2k9w9', 'template_lznlhid', templateParams, 'j-21O-a05d3y1J9t-')
+    emailjs.send('service_6hqukwx', 'template_lznlhid', templateParams, 'TV2Z1HnCPye7yY8QQ')
         .then((response) => {
             console.log('SUCCESS!', response.status, response.text);
             setEmailSent(true);
