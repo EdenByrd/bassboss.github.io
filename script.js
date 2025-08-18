@@ -251,8 +251,8 @@ const App = () => {
     );
 
     const stepContent = (
-      <div className="flex flex-col justify-between h-72">
-        <h2 className="text-2xl font-bold text-white">{
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-4">{
           [
             "What genres of music do you primarily play?",
             "What is the estimated crowd size?",
@@ -265,7 +265,7 @@ const App = () => {
           ][step - 1]
         }</h2>
         {errorMessage && step === 7 && <p className="text-red-400 my-2">{errorMessage}</p>}
-        <div className="mt-auto flex justify-between items-center w-full">
+        <div className="flex justify-between items-center w-full">
           <div>
             {step === 1 && <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Genre...</option><option value="hiphop">Hip-Hop / Rap</option><option value="electronic">Electronic (EDM, House, Techno)</option><option value="live">Live Band</option><option value="rock">Rock / Pop</option><option value="various">Various / Open Format</option></select>}
             {step === 2 && <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Crowd Size...</option><option value="under100">Under 100</option><option value="upTo300">Up to 300</option><option value="upTo1000">Up to 1000</option><option value="over1000">Over 1000</option><option value="upTo5000">Up to 5000</option></select>}
