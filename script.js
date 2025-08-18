@@ -184,7 +184,7 @@ const App = () => {
   };
 
   const sendEmail = () => {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxndQqVb8PaWj_JIe9lNZwvNyapws4DfM56finaKMswkjT8Xl2F8Maqhy0ofUvUbsk/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxmh1hZv9MAIRDQW--SNVjaxrTYNVI2ksNFY5qMnW7gVmdIeqCjubkSwpsrGYfMVmIezw/exec';
     
     if (email && quotes) {
         const payload = {
