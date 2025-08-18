@@ -220,8 +220,7 @@ const App = () => {
     };
 
     // 3. Send the email using the EmailJS SDK
-    // ** IMPORTANT: Replace with your actual IDs from your EmailJS account **
-    emailjs.send('service_6hqukwx', 'template_lznlhid', templateParams, 'TV2Z1HnCPye7yY8QQ')
+    emailjs.send('service_1v2k9w9', 'template_lznlhid', templateParams, 'j-21O-a05d3y1J9t-')
         .then((response) => {
             console.log('SUCCESS!', response.status, response.text);
             setEmailSent(true);
@@ -238,120 +237,56 @@ const App = () => {
   };
   
   const renderStep = () => {
-    const commonSelectClasses = "w-full p-3 border rounded mb-4 bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400";
-    const primaryButtonClasses = "bg-yellow-400 text-black font-bold px-4 py-3 rounded hover:bg-yellow-500 transition-colors duration-300 w-full";
-    const secondaryButtonClasses = "bg-gray-600 text-white font-bold px-4 py-3 rounded hover:bg-gray-500 transition-colors duration-300 w-1/2";
+    const commonSelectClasses = "w-auto p-3 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400";
+    const primaryButtonClasses = "w-auto p-3 border rounded bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors duration-300";
+    const secondaryButtonClasses = "w-auto p-3 border rounded bg-gray-600 text-white font-bold hover:bg-gray-500 transition-colors duration-300";
     
     const renderNavButtons = (onNext) => (
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-end gap-4">
             <button onClick={prevStep} className={secondaryButtonClasses}>Back</button>
-            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold px-4 py-3 rounded transition-colors duration-300 w-1/2`}>
+            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold p-3 rounded transition-colors duration-300 w-auto`}>
                 {onNext === validateAndGenerateQuotes ? 'Generate Quotes' : 'Next'}
             </button>
         </div>
     );
 
-    switch (step) {
-      case 1:
-        return (
+    const stepContent = (
+      <div className="flex flex-col justify-between h-72">
+        <h2 className="text-2xl font-bold text-white">{
+          [
+            "What genres of music do you primarily play?",
+            "What is the estimated crowd size?",
+            "Where will you primarily use the speakers?",
+            "Do you need sound for a DJ Booth / Stage?",
+            "What are your transportation limitations?",
+            "What are your power limitations?",
+            errorMessage ? <span className="text-red-400">Input Error</span> : "What is your approximate budget? (Optional)",
+            "Your Custom BASSBOSS Quotes"
+          ][step - 1]
+        }</h2>
+        {errorMessage && step === 7 && <p className="text-red-400 my-2">{errorMessage}</p>}
+        <div className="mt-auto flex justify-between items-center w-full">
           <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What genres of music do you primarily play?</h2>
-            <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}>
-              <option value="">Select Genre...</option>
-              <option value="hiphop">Hip-Hop / Rap</option>
-              <option value="electronic">Electronic (EDM, House, Techno)</option>
-              <option value="live">Live Band</option>
-              <option value="rock">Rock / Pop</option>
-              <option value="various">Various / Open Format</option>
-            </select>
-            <button onClick={nextStep} className={primaryButtonClasses}>Next</button>
+            {step === 1 && <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Genre...</option><option value="hiphop">Hip-Hop / Rap</option><option value="electronic">Electronic (EDM, House, Techno)</option><option value="live">Live Band</option><option value="rock">Rock / Pop</option><option value="various">Various / Open Format</option></select>}
+            {step === 2 && <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Crowd Size...</option><option value="under100">Under 100</option><option value="upTo300">Up to 300</option><option value="upTo1000">Up to 1000</option><option value="over1000">Over 1000</option><option value="upTo5000">Up to 5000</option></select>}
+            {step === 3 && <select name="venueType" value={answers.venueType} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Venue Type...</option><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="both">Both</option></select>}
+            {step === 4 && <select name="boothMonitors" value={answers.boothMonitors} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select an option...</option><option value="yes">Yes</option><option value="no">No</option></select>}
+            {step === 5 && <select name="transportation" value={answers.transportation} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Transportation...</option><option value="car">Car</option><option value="suv">SUV / Van</option><option value="truck">Truck / Trailer</option><option value="none">None</option></select>}
+            {step === 6 && <select name="power" value={answers.power} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Power...</option><option value="standard">Standard Outlets (15A)</option><option value="dedicated">Dedicated Circuits (20A+)</option><option value="generator">Generator</option><option value="unknown">Unknown</option></select>}
+            {step === 7 && <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />}
           </div>
-        );
-      case 2:
-        return (
           <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What is the estimated crowd size?</h2>
-            <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}>
-              <option value="">Select Crowd Size...</option>
-              <option value="under100">Under 100 people</option>
-              <option value="upTo300">Up to 300 people</option>
-              <option value="upTo1000">Up to 1000 people</option>
-              <option value="over1000">Over 1000 people</option>
-              <option value="upTo5000">Up to 5000 people</option>
-            </select>
-            {renderNavButtons(nextStep)}
+            {step === 1 && <button onClick={nextStep} className={primaryButtonClasses}>Next</button>}
+            {step > 1 && step < 7 && renderNavButtons(nextStep)}
+            {step === 7 && renderNavButtons(validateAndGenerateQuotes)}
           </div>
-        );
-      case 3:
-         return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Where will you primarily use the speakers?</h2>
-            <select name="venueType" value={answers.venueType} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Venue Type...</option>
-                <option value="indoor">Primarily Indoor</option>
-                <option value="outdoor">Primarily Outdoor</option>
-                <option value="both">Both Indoor & Outdoor</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 4:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Do you need sound for a DJ Booth / Stage?</h2>
-            <select name="boothMonitors" value={answers.boothMonitors} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select an option...</option>
-                <option value="yes">Yes, I need monitors.</option>
-                <option value="no">No, I'm covered.</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 5:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What are your transportation limitations?</h2>
-            <select name="transportation" value={answers.transportation} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Transportation...</option>
-                <option value="car">Car</option>
-                <option value="suv">SUV / Van</option>
-                <option value="truck">Truck / Trailer</option>
-                <option value="none">No limitations</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 6:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What are your power limitations?</h2>
-             <select name="power" value={answers.power} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Power Availability...</option>
-                <option value="standard">Standard Wall Outlets (15A)</option>
-                <option value="dedicated">Dedicated Circuits (20A+)</option>
-                <option value="generator">Generator</option>
-                <option value="unknown">I don't know</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 7:
-        return (
-          <div>
-            {errorMessage ? (
-                <div className="bg-red-800 border border-red-600 text-white p-4 rounded-lg mb-4">
-                    <h3 className="font-bold text-lg mb-2">Input Error</h3>
-                    <p>{errorMessage}</p>
-                </div>
-            ) : (
-                <h2 className="text-2xl font-bold mb-4 text-white">What is your approximate budget? (Optional)</h2>
-            )}
-            <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />
-            {renderNavButtons(validateAndGenerateQuotes)}
-          </div>
-        );
-      case 8:
-        return (
+        </div>
+      </div>
+    );
+    
+    if (step === 8) {
+      // Final quote page has a different layout
+      return (
           <div>
             <h2 className="text-3xl font-bold mb-6 text-center text-white">Your Custom BASSBOSS Quotes</h2>
             
@@ -418,10 +353,10 @@ const App = () => {
                  <button onClick={() => setStep(1)} className="mt-4 text-sm text-gray-400 hover:text-yellow-400 hover:underline">Start Over</button>
             </div>
           </div>
-        );
-      default:
-        return <div>Loading...</div>;
+      );
     }
+
+    return stepContent;
   };
 
   if (!productCatalog) {
@@ -433,7 +368,7 @@ const App = () => {
   }
 
   return (
-    <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
+    <div className="bg-gray-900/90 border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
         <div className="background-container absolute inset-0 pointer-events-none"></div>
         <div className="relative z-10">
             <img 
