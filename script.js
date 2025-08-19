@@ -226,7 +226,7 @@ const App = () => {
     };
     const emailBody = `<h1>Your BASSBOSS System Recommendation</h1><p>Here are the custom system quotes you generated based on your requirements.</p><hr>${formatSystemForEmail(quotes.budget, 'Standard System')}${formatSystemForEmail(quotes.premium, 'High-Capability System')}${quotes.monitorRec ? formatSystemForEmail(quotes.monitorRec, 'Booth Monitor Recommendation') : ''}`;
     const templateParams = { to_email: email, subject: "Your BASSBOSS System Quote", message: emailBody };
-    emailjs.send('service_6hqukwx', 'template_lznlhid', templateParams, 'TV2Z1HnCPye7yY8QQ')
+    emailjs.send('service_1v2k9w9', 'template_lznlhid', templateParams, 'j-21O-a05d3y1J9t-')
         .then((response) => {
             console.log('SUCCESS!', response.status, response.text);
             setEmailSent(true);
@@ -249,13 +249,13 @@ const App = () => {
   
   const renderStep = () => {
     const commonSelectClasses = "w-auto p-3 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400";
-    const primaryButtonClasses = "w-auto p-3 border rounded bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors duration-300";
-    const secondaryButtonClasses = "w-auto p-3 border rounded bg-gray-600 text-white font-bold hover:bg-gray-500 transition-colors duration-300";
+    const primaryButtonClasses = "w-full sm:w-auto p-3 border rounded bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors duration-300";
+    const secondaryButtonClasses = "w-full sm:w-auto p-3 border rounded bg-gray-600 text-white font-bold hover:bg-gray-500 transition-colors duration-300";
     
     const renderNavButtons = (onNext, onBack) => (
-        <div className="flex justify-end gap-4">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-4">
             <button onClick={onBack || prevStep} className={secondaryButtonClasses}>Back</button>
-            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold p-3 rounded transition-colors duration-300 w-auto`}>
+            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold p-3 rounded transition-colors duration-300 w-full sm:w-auto`}>
                 {onNext === validateAndGenerateQuotes ? 'Generate Quotes' : 'Next'}
             </button>
         </div>
@@ -269,7 +269,7 @@ const App = () => {
             "What is the estimated crowd size?",
             "Where will you primarily use the speakers?",
             "Do you need sound for a DJ Booth / Stage?",
-            "Do you want subwoofers in the booth?", // New Step 5
+            "Do you want subwoofers in the booth?",
             "What are your transportation limitations?",
             "What are your power limitations?",
             errorMessage ? <span className="text-red-400">Input Error</span> : "What is your approximate budget? (Optional)",
@@ -277,8 +277,8 @@ const App = () => {
           ][step - 1]
         }</h2>
         {errorMessage && step === 8 && <p className="text-red-400 my-2">{errorMessage}</p>}
-        <div className="flex justify-between items-center w-full mt-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full mt-4 gap-4">
+          <div className="w-full sm:w-auto">
             {step === 1 && <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Genre...</option><option value="hiphop">Hip-Hop / Rap</option><option value="electronic">Electronic (EDM, House, Techno)</option><option value="live">Live Band</option><option value="rock">Rock / Pop</option><option value="various">Various / Open Format</option></select>}
             {step === 2 && <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Crowd Size...</option><option value="under100">Under 100</option><option value="upTo300">Up to 300</option><option value="upTo1000">Up to 1000</option><option value="over1000">Over 1000</option><option value="upTo5000">Up to 5000</option></select>}
             {step === 3 && <select name="venueType" value={answers.venueType} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Venue Type...</option><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="both">Both</option></select>}
@@ -288,7 +288,7 @@ const App = () => {
             {step === 7 && <select name="power" value={answers.power} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Power...</option><option value="standard">Standard Outlets (15A)</option><option value="dedicated">Dedicated Circuits (20A+)</option><option value="generator">Generator</option><option value="unknown">Unknown</option></select>}
             {step === 8 && <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />}
           </div>
-          <div className="ml-4">
+          <div className="w-full sm:w-auto">
             {step === 1 && <button onClick={nextStep} className={primaryButtonClasses}>Next</button>}
             {step === 2 && renderNavButtons(nextStep)}
             {step === 3 && renderNavButtons(nextStep)}
