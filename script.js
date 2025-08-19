@@ -4,17 +4,18 @@ const App = () => {
   const [answers, setAnswers] = React.useState({
     genre: '',
     crowdSize: '',
-    budget: '',
-    transportation: '',
-    power: '',
     venueType: '',
     boothMonitors: '',
+    boothSubs: '', // New state for the conditional question
+    transportation: '',
+    power: '',
+    budget: '',
   });
   const [quotes, setQuotes] = React.useState(null);
   const [email, setEmail] = React.useState('');
   const [emailSent, setEmailSent] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
-  const totalSteps = 8;
+  const totalSteps = 9; // Increased total steps to accommodate the new question
 
   React.useEffect(() => {
     fetch('speakers.json')
@@ -30,6 +31,24 @@ const App = () => {
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
+
+  // Custom navigation logic to handle the conditional question
+  const handleNextAfterMonitors = () => {
+    if (answers.boothMonitors === 'yes' && answers.genre !== 'live') {
+      setStep(5); // Go to the new "booth subs" question
+    } else {
+      setStep(6); // Skip the "booth subs" question
+    }
+  };
+
+  const handleBackFromTransport = () => {
+      if (answers.boothMonitors === 'yes' && answers.genre !== 'live') {
+          setStep(5); // Go back to the "booth subs" question
+      } else {
+          setStep(4); // Go back to the "booth monitors" question
+      }
+  };
+
 
   // Helper function to calculate volume
   const getVolume = (dimensions) => {
@@ -66,7 +85,7 @@ const App = () => {
 
     if (budget && minSystemCosts[crowdSize] && budget < minSystemCosts[crowdSize]) {
         setErrorMessage(`Your budget of $${budget} may be too low for a crowd of this size. A typical system starts around $${minSystemCosts[crowdSize].toLocaleString()}. Please adjust your budget or crowd size.`);
-        setStep(7); // Go back to the budget step
+        setStep(8);
         return;
     }
     
@@ -81,7 +100,7 @@ const App = () => {
 
     if (transportCapacity && systemVolume > transportCapacity) {
         setErrorMessage(`A system for this crowd size may not fit in your selected vehicle (${transportation}). The estimated volume is ~${systemVolume.toFixed(1)} ft³, which may exceed your vehicle's capacity of ~${transportCapacity} ft³. Please select a larger vehicle option.`);
-        setStep(7); // Go back to the budget/final step
+        setStep(8);
         return;
     }
 
@@ -92,7 +111,7 @@ const App = () => {
   const generateQuotes = () => {
     if (!productCatalog) return;
 
-    const { crowdSize, venueType, boothMonitors, genre } = answers;
+    const { crowdSize, venueType, boothMonitors, genre, boothSubs } = answers;
     const isBassHeavy = genre === 'hiphop' || genre === 'electronic';
 
     let budgetSystem = { tops: [], subs: [] };
@@ -136,6 +155,11 @@ const App = () => {
         } else {
             monitorSystem = [findTop('CCM12-MK3'), findTop('CCM12-MK3')];
         }
+
+        if (boothSubs === 'yes') {
+            monitorSystem.push(findSub('DJ18S-MK3'), findSub('DJ18S-MK3'));
+        }
+
         monitorRec = {
             system: monitorSystem,
             total: monitorSystem.reduce((acc, item) => acc + (item ? item.price : 0), 0),
@@ -180,168 +204,116 @@ const App = () => {
       premium: { system: premiumSystem, total: calculateTotal(premiumSystem), spl: calculateSpl(premiumSystem), amperage: calculateAmperage(premiumSystem), lowest_freq: getLowestFreq(premiumSystem), volume: calculateSystemVolume(premiumSystem) },
       monitorRec: monitorRec,
     });
-    nextStep();
+    setStep(9); // Go to the final quote page
   };
 
   const sendEmail = () => {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxndQqVb8PaWj_JIe9lNZwvNyapws4DfM56finaKMswkjT8Xl2F8Maqhy0ofUvUbsk/exec';
-    
-    if (email && quotes) {
-        const payload = {
-            email: email,
-            quotes: quotes
-        };
-
-        const formData = new FormData();
-        formData.append('postData', JSON.stringify(payload));
-
-        fetch(scriptURL, {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => {
+    if (!email || !quotes) return;
+    const formatSystemForEmail = (systemData, title) => {
+        if (!systemData || !systemData.system) return '';
+        let html = `<h2>${title}</h2><ul>`;
+        if (Array.isArray(systemData.system.tops)) {
+            systemData.system.tops.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        if (Array.isArray(systemData.system.subs)) {
+            systemData.system.subs.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        if (Array.isArray(systemData.system) && !systemData.system.tops && !systemData.system.subs) {
+            systemData.system.forEach(item => { html += `<li>${item.name} - $${item.price.toLocaleString()}</li>`; });
+        }
+        html += `</ul><p><b>Total MSRP:</b> $${systemData.total.toLocaleString()}</p><hr>`;
+        return html;
+    };
+    const emailBody = `<h1>Your BASSBOSS System Recommendation</h1><p>Here are the custom system quotes you generated based on your requirements.</p><hr>${formatSystemForEmail(quotes.budget, 'Standard System')}${formatSystemForEmail(quotes.premium, 'High-Capability System')}${quotes.monitorRec ? formatSystemForEmail(quotes.monitorRec, 'Booth Monitor Recommendation') : ''}`;
+    const templateParams = { to_email: email, subject: "Your BASSBOSS System Quote", message: emailBody };
+    emailjs.send('service_1v2k9w9', 'template_lznlhid', templateParams, 'j-21O-a05d3y1J9t-')
+        .then((response) => {
+            console.log('SUCCESS!', response.status, response.text);
             setEmailSent(true);
             setTimeout(() => {
                 setStep(1);
                 setEmail('');
                 setEmailSent(false);
-                setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '' });
+                setAnswers({ genre: '', crowdSize: '', budget: '', transportation: '', power: '', venueType: '', boothMonitors: '', boothSubs: '' });
             }, 3000);
-        })
-        .catch(error => {
-            console.error('Error sending email:', error);
+        }, (error) => {
+            console.log('FAILED...', error);
             alert('There was an error sending your quote. Please try again.');
         });
-    }
+  };
+
+  const formatAnswerKey = (key) => {
+    const words = key.replace(/([A-Z])/g, ' $1');
+    return words.toUpperCase();
   };
   
   const renderStep = () => {
-    const commonSelectClasses = "w-full p-3 border rounded mb-4 bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400";
-    const primaryButtonClasses = "bg-yellow-400 text-black font-bold px-4 py-3 rounded hover:bg-yellow-500 transition-colors duration-300 w-full";
-    const secondaryButtonClasses = "bg-gray-600 text-white font-bold px-4 py-3 rounded hover:bg-gray-500 transition-colors duration-300 w-1/2";
+    const commonSelectClasses = "w-auto p-3 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-400";
+    const primaryButtonClasses = "w-full sm:w-auto p-3 border rounded bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors duration-300";
+    const secondaryButtonClasses = "w-full sm:w-auto p-3 border rounded bg-gray-600 text-white font-bold hover:bg-gray-500 transition-colors duration-300";
     
-    const renderNavButtons = (onNext) => (
-        <div className="flex justify-between gap-4">
-            <button onClick={prevStep} className={secondaryButtonClasses}>Back</button>
-            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold px-4 py-3 rounded transition-colors duration-300 w-1/2`}>
+    const renderNavButtons = (onNext, onBack) => (
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-4">
+            <button onClick={onBack || prevStep} className={secondaryButtonClasses}>Back</button>
+            <button onClick={onNext} className={`${onNext === validateAndGenerateQuotes ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-yellow-400 text-black hover:bg-yellow-500'} font-bold p-3 rounded transition-colors duration-300 w-full sm:w-auto`}>
                 {onNext === validateAndGenerateQuotes ? 'Generate Quotes' : 'Next'}
             </button>
         </div>
     );
 
-    switch (step) {
-      case 1:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What genres of music do you primarily play?</h2>
-            <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}>
-              <option value="">Select Genre...</option>
-              <option value="hiphop">Hip-Hop / Rap</option>
-              <option value="electronic">Electronic (EDM, House, Techno)</option>
-              <option value="live">Live Band</option>
-              <option value="rock">Rock / Pop</option>
-              <option value="various">Various / Open Format</option>
-            </select>
-            <button onClick={nextStep} className={primaryButtonClasses}>Next</button>
+    const stepContent = (
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-4">{
+          [
+            "What genres of music do you primarily play?",
+            "What is the estimated crowd size?",
+            "Where will you primarily use the speakers?",
+            "Do you need sound for a DJ Booth / Stage?",
+            "Do you want subwoofers in the booth?",
+            "What are your transportation limitations?",
+            "What are your power limitations?",
+            errorMessage ? <span className="text-red-400">Input Error</span> : "What is your approximate budget? (Optional)",
+            "Your Custom BASSBOSS Quotes"
+          ][step - 1]
+        }</h2>
+        {errorMessage && step === 8 && <p className="text-red-400 my-2">{errorMessage}</p>}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full mt-4 gap-4">
+          <div className="w-full sm:w-auto">
+            {step === 1 && <select name="genre" value={answers.genre} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Genre...</option><option value="hiphop">Hip-Hop / Rap</option><option value="electronic">Electronic (EDM, House, Techno)</option><option value="live">Live Band</option><option value="rock">Rock / Pop</option><option value="various">Various / Open Format</option></select>}
+            {step === 2 && <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Crowd Size...</option><option value="under100">Under 100</option><option value="upTo300">Up to 300</option><option value="upTo1000">Up to 1000</option><option value="over1000">Over 1000</option><option value="upTo5000">Up to 5000</option></select>}
+            {step === 3 && <select name="venueType" value={answers.venueType} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Venue Type...</option><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="both">Both</option></select>}
+            {step === 4 && <select name="boothMonitors" value={answers.boothMonitors} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select an option...</option><option value="yes">Yes</option><option value="no">No</option></select>}
+            {step === 5 && <select name="boothSubs" value={answers.boothSubs} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select an option...</option><option value="yes">Yes</option><option value="no">No</option></select>}
+            {step === 6 && <select name="transportation" value={answers.transportation} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Transportation...</option><option value="car">Car</option><option value="suv">SUV / Van</option><option value="truck">Truck / Trailer</option><option value="none">None</option></select>}
+            {step === 7 && <select name="power" value={answers.power} onChange={handleInputChange} className={commonSelectClasses}><option value="">Select Power...</option><option value="standard">Standard Outlets (15A)</option><option value="dedicated">Dedicated Circuits (20A+)</option><option value="generator">Generator</option><option value="unknown">Unknown</option></select>}
+            {step === 8 && <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />}
           </div>
-        );
-      case 2:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What is the estimated crowd size?</h2>
-            <select name="crowdSize" value={answers.crowdSize} onChange={handleInputChange} className={commonSelectClasses}>
-              <option value="">Select Crowd Size...</option>
-              <option value="under100">Under 100 people</option>
-              <option value="upTo300">Up to 300 people</option>
-              <option value="upTo1000">Up to 1000 people</option>
-              <option value="over1000">Over 1000 people</option>
-              <option value="upTo5000">Up to 5000 people</option>
-            </select>
-            {renderNavButtons(nextStep)}
+          <div className="w-full sm:w-auto">
+            {step === 1 && <button onClick={nextStep} className={primaryButtonClasses}>Next</button>}
+            {step === 2 && renderNavButtons(nextStep)}
+            {step === 3 && renderNavButtons(nextStep)}
+            {step === 4 && renderNavButtons(handleNextAfterMonitors)}
+            {step === 5 && renderNavButtons(nextStep)}
+            {step === 6 && renderNavButtons(nextStep, handleBackFromTransport)}
+            {step === 7 && renderNavButtons(nextStep)}
+            {step === 8 && renderNavButtons(validateAndGenerateQuotes)}
           </div>
-        );
-      case 3:
-         return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Where will you primarily use the speakers?</h2>
-            <select name="venueType" value={answers.venueType} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Venue Type...</option>
-                <option value="indoor">Primarily Indoor</option>
-                <option value="outdoor">Primarily Outdoor</option>
-                <option value="both">Both Indoor & Outdoor</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 4:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Do you need sound for a DJ Booth / Stage?</h2>
-            <select name="boothMonitors" value={answers.boothMonitors} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select an option...</option>
-                <option value="yes">Yes, I need monitors.</option>
-                <option value="no">No, I'm covered.</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 5:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What are your transportation limitations?</h2>
-            <select name="transportation" value={answers.transportation} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Transportation...</option>
-                <option value="car">Car</option>
-                <option value="suv">SUV / Van</option>
-                <option value="truck">Truck / Trailer</option>
-                <option value="none">No limitations</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 6:
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-white">What are your power limitations?</h2>
-             <select name="power" value={answers.power} onChange={handleInputChange} className={commonSelectClasses}>
-                <option value="">Select Power Availability...</option>
-                <option value="standard">Standard Wall Outlets (15A)</option>
-                <option value="dedicated">Dedicated Circuits (20A+)</option>
-                <option value="generator">Generator</option>
-                <option value="unknown">I don't know</option>
-            </select>
-            {renderNavButtons(nextStep)}
-          </div>
-        );
-      case 7:
-        return (
-          <div>
-            {errorMessage ? (
-                <div className="bg-red-800 border border-red-600 text-white p-4 rounded-lg mb-4">
-                    <h3 className="font-bold text-lg mb-2">Input Error</h3>
-                    <p>{errorMessage}</p>
-                </div>
-            ) : (
-                <h2 className="text-2xl font-bold mb-4 text-white">What is your approximate budget? (Optional)</h2>
-            )}
-            <input type="number" name="budget" value={answers.budget} placeholder="Enter budget in USD..." onChange={handleInputChange} className={`${commonSelectClasses} placeholder-gray-400`} />
-            {renderNavButtons(validateAndGenerateQuotes)}
-          </div>
-        );
-      case 8:
-        return (
+        </div>
+      </div>
+    );
+    
+    if (step === 9) {
+      // Final quote page has a different layout
+      return (
           <div>
             <h2 className="text-3xl font-bold mb-6 text-center text-white">Your Custom BASSBOSS Quotes</h2>
             
             <div className="mb-8 p-4 border border-gray-600 rounded-lg bg-gray-800/50">
-                <h3 className="text-xl font-bold mb-3 text-yellow-400">Your Requirements:</h3>
-                <ul className="text-gray-300 grid md:grid-cols-3 sm:grid-cols-2 gap-x-4 gap-y-2">
-                    <li><strong>Genre:</strong> {answers.genre || 'N/A'}</li>
-                    <li><strong>Crowd:</strong> {answers.crowdSize || 'N/A'}</li>
-                    <li><strong>Venue:</strong> {answers.venueType || 'N/A'}</li>
-                    <li><strong>Monitors:</strong> {answers.boothMonitors || 'N/A'}</li>
-                    <li><strong>Transport:</strong> {answers.transportation || 'N/A'}</li>
-                    <li><strong>Power:</strong> {answers.power || 'N/A'}</li>
+                <h3 className="text-xl font-bold mb-3 text-yellow-400">YOUR REQUIREMENTS</h3>
+                <ul className="text-gray-300 grid md:grid-cols-2 gap-x-6 gap-y-2">
+                    {Object.entries(answers).filter(([key, value]) => value && key !== 'budget').map(([key, value]) => (
+                        <li key={key}><strong>{formatAnswerKey(key)}:</strong> {value.toUpperCase()}</li>
+                    ))}
                 </ul>
             </div>
 
@@ -396,10 +368,10 @@ const App = () => {
                  <button onClick={() => setStep(1)} className="mt-4 text-sm text-gray-400 hover:text-yellow-400 hover:underline">Start Over</button>
             </div>
           </div>
-        );
-      default:
-        return <div>Loading...</div>;
+      );
     }
+
+    return stepContent;
   };
 
   if (!productCatalog) {
@@ -411,7 +383,7 @@ const App = () => {
   }
 
   return (
-    <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
+    <div className="bg-gray-900/90 border border-gray-700 p-8 rounded-lg shadow-2xl w-full max-w-4xl relative overflow-hidden">
         <div className="background-container absolute inset-0 pointer-events-none"></div>
         <div className="relative z-10">
             <img 
